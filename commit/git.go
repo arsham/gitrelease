@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -24,7 +25,6 @@ func (g Git) LatestTag(ctx context.Context) (string, error) {
 		"--tags",
 		"--abbrev=0",
 	}
-	// nolint:gosec // we don't have any other way to get the previous tag.
 	cmd := exec.CommandContext(ctx, "git", args...)
 	cmd.Dir = g.Dir
 	out, err := cmd.CombinedOutput()
@@ -72,4 +72,30 @@ func (g Git) Commits(ctx context.Context, tag1, tag2 string) ([]string, error) {
 	}
 	logs := strings.Split(string(out), separator)
 	return logs, nil
+}
+
+var infoRe = regexp.MustCompile(`github\.com[:/](?P<user>[^/]+)/(?P<repo>[^\n.]+)(\.git)?`)
+
+// RepoInfo returns some information about the repository.
+func (g Git) RepoInfo(ctx context.Context) (user, repo string, err error) {
+	args := []string{
+		"config",
+		"--get",
+		"remote.origin.url",
+	}
+	cmd := exec.CommandContext(ctx, "git", args...)
+	cmd.Dir = g.Dir
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", "", errors.Wrap(err, string(out))
+	}
+
+	info := infoRe.FindStringSubmatch(string(out))
+	if len(info) != 4 {
+		return "", "", fmt.Errorf("could not parse repository info: %s", string(out))
+	}
+	user = info[1]
+	repo = info[2]
+
+	return user, repo, nil
 }

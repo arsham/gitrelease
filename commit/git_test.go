@@ -2,6 +2,8 @@ package commit_test
 
 import (
 	"context"
+	"fmt"
+	"os/exec"
 	"testing"
 
 	"github.com/arsham/gitrelease/commit"
@@ -16,6 +18,7 @@ func TestGit(t *testing.T) {
 	t.Run("LatestTag", testGitLatestTag)
 	t.Run("PreviousTag", testGitPreviousTag)
 	t.Run("Commits", testGitCommits)
+	t.Run("RepoInfo", testGitRepoInfo)
 }
 
 func testGitLatestTag(t *testing.T) {
@@ -107,5 +110,45 @@ func testGitCommits(t *testing.T) {
 	require.NoError(t, err)
 	if diff := cmp.Diff(msgs, got, commitComparer...); diff != "" {
 		t.Errorf("(-want +got):\n%s", diff)
+	}
+}
+
+func testGitRepoInfo(t *testing.T) {
+	t.Parallel()
+
+	wantUser := "arsham666"
+	wantRepo := "gitrelease777"
+	addrs := map[string]string{
+		"git protocol":      fmt.Sprintf("git@github.com:%s/%s", wantUser, wantRepo),
+		"git protocol tail": fmt.Sprintf("git@github.com:%s/%s.git", wantUser, wantRepo),
+		"no protocol":       fmt.Sprintf("github.com/%s/%s", wantUser, wantRepo),
+		"no protocol tail":  fmt.Sprintf("github.com/%s/%s.git", wantUser, wantRepo),
+		"protocol":          fmt.Sprintf("https://github.com/%s/%s", wantUser, wantRepo),
+		"protocol tail":     fmt.Sprintf("https://github.com/%s/%s.git", wantUser, wantRepo),
+	}
+
+	for name, addr := range addrs {
+		t.Run(name, func(t *testing.T) {
+			dir := createGitRepo(t)
+
+			g := commit.Git{
+				Dir: dir,
+			}
+			args := []string{
+				"remote",
+				"add",
+				"origin",
+				addr,
+			}
+			cmd := exec.CommandContext(context.Background(), "git", args...)
+			cmd.Dir = dir
+			out, err := cmd.CombinedOutput()
+			require.NoError(t, err, string(out))
+
+			user, repo, err := g.RepoInfo(context.Background())
+			require.NoError(t, err)
+			assert.Equal(t, wantUser, user)
+			assert.Equal(t, wantRepo, repo)
+		})
 	}
 }
