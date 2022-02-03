@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/blokur/testament v0.2.2
+	github.com/google/go-cmp v0.5.6
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
 )
@@ -11,7 +12,6 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/kr/text v0.2.0 // indirect

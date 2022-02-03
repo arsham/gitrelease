@@ -4,6 +4,7 @@ package commit
 
 import (
 	"context"
+	"fmt"
 	"os/exec"
 	"strings"
 
@@ -51,4 +52,24 @@ func (g Git) PreviousTag(ctx context.Context, tag string) (string, error) {
 	}
 
 	return strings.Trim(string(out), "\n"), nil
+}
+
+// Commits returns the contents of all commits between two tags.
+func (g Git) Commits(ctx context.Context, tag1, tag2 string) ([]string, error) {
+	separator := "00000000000000000000000000000000000"
+	args := []string{
+		"log",
+		"--oneline",
+		fmt.Sprintf("%s..%s", tag1, tag2),
+		fmt.Sprintf("--pretty=%s%%B", separator),
+	}
+	// nolint:gosec // we need these variables.
+	cmd := exec.CommandContext(ctx, "git", args...)
+	cmd.Dir = g.Dir
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, errors.Wrap(err, string(out))
+	}
+	logs := strings.Split(string(out), separator)
+	return logs, nil
 }

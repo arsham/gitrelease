@@ -6,8 +6,11 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"sort"
+	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
 )
 
@@ -67,4 +70,35 @@ func commitChanges(t *testing.T, dir, msg string) {
 	cmd.Dir = dir
 	out, err = cmd.CombinedOutput()
 	require.NoError(t, err, string(out))
+}
+
+func appendToFile(t *testing.T, dir, filename, msg string) {
+	t.Helper()
+	require.NoError(t, os.Chdir(dir))
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0o600)
+	require.NoError(t, err)
+	defer f.Close()
+
+	_, err = f.WriteString(msg)
+	require.NoError(t, err)
+}
+
+var cmpIgnoreNewlines = cmp.Transformer("IgnoreNewlines", func(in string) string {
+	return strings.ReplaceAll(in, "\n", "")
+})
+
+var stringSliceCleaner = cmp.Transformer("CleanStringSlice", func(in []string) []string {
+	out := make([]string, 0, len(in))
+	for _, s := range in {
+		if s != "" {
+			out = append(out, s)
+		}
+	}
+	sort.Strings(out)
+	return out
+})
+
+var commitComparer = cmp.Options{
+	cmpIgnoreNewlines,
+	stringSliceCleaner,
 }
