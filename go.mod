@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/blokur/testament v0.2.2
+	github.com/github-release/github-release v0.10.0
 	github.com/google/go-cmp v0.5.6
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
@@ -14,9 +15,11 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/kevinburke/rest v0.0.0-20210506044642-5611499aa33c // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
 	golang.org/x/text v0.3.7 // indirect

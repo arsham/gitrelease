@@ -3,14 +3,20 @@
 package commit
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os/exec"
 	"regexp"
 	"strings"
 
+	"github.com/github-release/github-release/github"
 	"github.com/pkg/errors"
 )
+
+const baseURL = "https://api.github.com"
 
 // Git executes git processes targeted at a directory. If the Dir property is
 // empty, all calls will be on the current folder.
@@ -98,4 +104,48 @@ func (g Git) RepoInfo(ctx context.Context) (user, repo string, err error) {
 	repo = info[2]
 
 	return user, repo, nil
+}
+
+type releaseCreate struct {
+	TagName         string `json:"tag_name"`
+	TargetCommitish string `json:"target_commitish,omitempty"`
+	Name            string `json:"name"`
+	Body            string `json:"body"`
+	Draft           bool   `json:"draft"`
+	Prerelease      bool   `json:"prerelease"`
+}
+
+// Release publishes the release for the user on the repo.
+func (g Git) Release(token, user, repo, tag, desc string) error {
+	params := releaseCreate{
+		TagName: tag,
+		Body:    desc,
+	}
+
+	payload, err := json.Marshal(params)
+	if err != nil {
+		return errors.Wrap(err, "marshalling values")
+	}
+
+	client := github.NewClient(repo, token, nil)
+	client.SetBaseURL(baseURL)
+	reader := bytes.NewReader(payload)
+	req, err := client.NewRequest("POST", fmt.Sprintf("/repos/%s/%s/releases", user, repo), reader)
+	if err != nil {
+		return errors.Wrapf(err, "creating request to the API: %q", string(payload))
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return errors.Wrapf(err, "submitting to the API: %q", string(payload))
+	}
+	// nolint:errcheck // it's ok.
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		if resp.StatusCode == 422 {
+			return errors.New("release already exists")
+		}
+		return fmt.Errorf("error publishing release with code: %q", resp.Status)
+	}
+	return nil
 }
