@@ -2,6 +2,7 @@ package commit_test
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"testing"
 
@@ -157,10 +158,14 @@ func testGroupParseGroupsMultipleGroups(t *testing.T) {
 	}
 	got := commit.ParseGroups(logs)
 
-	got = strings.TrimRight(got, "\n")
-	want := "### Feature\n\n- **Testing:** This is a test\n\n\n" +
-		"### Misc\n\n- This is another test"
-	if diff := cmp.Diff(want, got); diff != "" {
+	want := []string{
+		"",
+		"### Feature\n\n- **Testing:** This is a test",
+		"### Misc\n\n- This is another test",
+	}
+	gotS := strings.Split(got, "\n\n\n")
+	sort.Strings(gotS)
+	if diff := cmp.Diff(want, gotS); diff != "" {
 		t.Errorf("(-want +got):\n%s", diff)
 	}
 }
