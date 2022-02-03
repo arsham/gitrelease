@@ -33,3 +33,22 @@ func (g Git) LatestTag(ctx context.Context) (string, error) {
 
 	return strings.Trim(string(out), "\n"), nil
 }
+
+// PreviousTag returns the previous tag of the given tag.
+func (g Git) PreviousTag(ctx context.Context, tag string) (string, error) {
+	args := []string{
+		"describe",
+		"--tags",
+		"--abbrev=0",
+		tag + "^",
+	}
+	// nolint:gosec // we don't have any other way to get the previous tag.
+	cmd := exec.CommandContext(ctx, "git", args...)
+	cmd.Dir = g.Dir
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", errors.Wrap(err, string(out))
+	}
+
+	return strings.Trim(string(out), "\n"), nil
+}
