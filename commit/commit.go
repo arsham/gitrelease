@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	descRe = regexp.MustCompile(`^\s*([[:alpha:]]+)\(?([[:alpha:]]+)?\)?:?(.*)`)
+	descRe = regexp.MustCompile(`^\s*([[:alpha:]]+)\(?([[:alpha:],]+)?\)?:?(.*)`)
 	refRe  = regexp.MustCompile(`[[:alpha:]]+\s+#\d+`)
 )
 
@@ -76,7 +76,12 @@ func (g Group) DescriptionString() string {
 		subject = "CI"
 	}
 	if subject != "" {
-		subject = "**" + upperFirst(subject) + ":** "
+		subjects := strings.Split(subject, ",")
+		for i := range subjects {
+			subjects[i] = upperFirst(subjects[i])
+		}
+		subject = strings.Join(subjects, ",")
+		subject = "**" + subject + ":** "
 	}
 
 	lines := strings.Split(g.Description, `\n`)

@@ -57,13 +57,14 @@ func TestGroupFromCommit(t *testing.T) {
 		"enhancement":  {line: "enhancement something", want: commit.NewGroup("Enhancements", "", "something")},
 		"enhancements": {line: "enhancements something", want: commit.NewGroup("Enhancements", "", "something")},
 		"style":        {line: "style something", want: commit.NewGroup("Style", "", "something")},
+		"comma sep":    {line: "fix(git,commit): something", want: commit.NewGroup("Fix", "git,commit", "something")},
 	}
 
 	for name, tc := range tcs {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			got := commit.GetGroup(tc.line)
+			got := commit.GroupFromCommit(tc.line)
 			if diff := cmp.Diff(tc.want, got, commit.GroupComparer...); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
@@ -119,6 +120,10 @@ func testGroupDescriptionString(t *testing.T) {
 		"multi issue refs": {
 			group: commit.NewGroup("Fix", "repo", msg+additional+`\n`+issue+`\n`+issue),
 			want:  fmt.Sprintf("%s**Repo:** %s (%s, %s)", prefix, wantMsg, issue, issue),
+		},
+		"comma separated": {
+			group: commit.NewGroup("Fix", "git,commit", msg),
+			want:  fmt.Sprintf("%s**Git,Commit:** %s", prefix, wantMsg),
 		},
 	}
 
