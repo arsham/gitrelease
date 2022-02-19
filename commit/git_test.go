@@ -118,19 +118,30 @@ func testGitRepoInfo(t *testing.T) {
 
 	wantUser := "arsham666"
 	wantRepo := "gitrelease777"
-	addrs := map[string]string{
-		"git protocol":      fmt.Sprintf("git@github.com:%s/%s", wantUser, wantRepo),
-		"git protocol tail": fmt.Sprintf("git@github.com:%s/%s.git", wantUser, wantRepo),
-		"no protocol":       fmt.Sprintf("github.com/%s/%s", wantUser, wantRepo),
-		"no protocol tail":  fmt.Sprintf("github.com/%s/%s.git", wantUser, wantRepo),
-		"protocol":          fmt.Sprintf("https://github.com/%s/%s", wantUser, wantRepo),
-		"protocol tail":     fmt.Sprintf("https://github.com/%s/%s.git", wantUser, wantRepo),
+	addrs := map[string]struct {
+		addr     string
+		wantUser string
+		wantRepo string
+	}{
+		"git protocol":          {"git@github.com:%s/%s", wantUser, wantRepo},
+		"git protocol dot":      {"git@github.com:%s/%s", wantUser, wantRepo + ".nvim"},
+		"git protocol tail":     {"git@github.com:%s/%s.git", wantUser, wantRepo},
+		"git protocol tail dot": {"git@github.com:%s/%s.git", wantUser, wantRepo + ".nvim"},
+		"no protocol":           {"github.com/%s/%s", wantUser, wantRepo},
+		"no protocol dot":       {"github.com/%s/%s", wantUser, wantRepo + ".nvim"},
+		"no protocol tail":      {"github.com/%s/%s.git", wantUser, wantRepo},
+		"no protocol tail dot":  {"github.com/%s/%s.git", wantUser, wantRepo + ".nvim"},
+		"protocol":              {"https://github.com/%s/%s", wantUser, wantRepo},
+		"protocol dot":          {"https://github.com/%s/%s", wantUser, wantRepo + ".nvim"},
+		"protocol tail":         {"https://github.com/%s/%s.git", wantUser, wantRepo},
+		"protocol tail dot":     {"https://github.com/%s/%s.git", wantUser, wantRepo + ".nvim"},
 	}
 
-	for name, addr := range addrs {
+	for name, tc := range addrs {
+		tc := tc
 		t.Run(name, func(t *testing.T) {
 			dir := createGitRepo(t)
-
+			addr := fmt.Sprintf(tc.addr, tc.wantUser, tc.wantRepo)
 			g := commit.Git{
 				Dir: dir,
 			}
@@ -146,9 +157,9 @@ func testGitRepoInfo(t *testing.T) {
 			require.NoError(t, err, string(out))
 
 			user, repo, err := g.RepoInfo(context.Background())
-			require.NoError(t, err)
-			assert.Equal(t, wantUser, user)
-			assert.Equal(t, wantRepo, repo)
+			require.NoError(t, err, addr)
+			assert.Equal(t, tc.wantUser, user)
+			assert.Equal(t, tc.wantRepo, repo)
 		})
 	}
 }

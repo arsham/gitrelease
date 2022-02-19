@@ -80,7 +80,7 @@ func (g Git) Commits(ctx context.Context, tag1, tag2 string) ([]string, error) {
 	return logs, nil
 }
 
-var infoRe = regexp.MustCompile(`github\.com[:/](?P<user>[^/]+)/(?P<repo>[^\n.]+)(\.git)?`)
+var infoRe = regexp.MustCompile(`github\.com[:/](?P<user>[^/]+)/(?P<repo>.+?)(?:.git)?\n?$`)
 
 // RepoInfo returns some information about the repository.
 func (g Git) RepoInfo(ctx context.Context) (user, repo string, err error) {
@@ -97,7 +97,7 @@ func (g Git) RepoInfo(ctx context.Context) (user, repo string, err error) {
 	}
 
 	info := infoRe.FindStringSubmatch(string(out))
-	if len(info) != 4 {
+	if len(info) != 3 {
 		return "", "", fmt.Errorf("could not parse repository info: %s", string(out))
 	}
 	user = info[1]
