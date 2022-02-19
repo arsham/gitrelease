@@ -114,6 +114,11 @@ func testGitCommits(t *testing.T) {
 }
 
 func testGitRepoInfo(t *testing.T) {
+	t.Run("Repo", testGitRepoInfoRepo)
+	t.Run("Remote", testGitRepoInfoRemote)
+}
+
+func testGitRepoInfoRepo(t *testing.T) {
 	t.Parallel()
 
 	wantUser := "arsham666"
@@ -162,4 +167,53 @@ func testGitRepoInfo(t *testing.T) {
 			assert.Equal(t, tc.wantRepo, repo)
 		})
 	}
+}
+
+func testGitRepoInfoRemote(t *testing.T) {
+	t.Parallel()
+	dir := createGitRepo(t)
+	g := commit.Git{
+		Dir: dir,
+	}
+
+	setup := []struct {
+		addr   string
+		remote string
+	}{{
+		addr:   "git@github.com:arsham/shark.git",
+		remote: "origin",
+	}, {
+		addr:   "git@github.com:arsham/arshlib.nvim.git",
+		remote: "other",
+	}}
+
+	for _, s := range setup {
+		args := []string{
+			"remote",
+			"add",
+			s.remote,
+			s.addr,
+		}
+		cmd := exec.CommandContext(context.Background(), "git", args...)
+		cmd.Dir = dir
+		out, err := cmd.CombinedOutput()
+		require.NoError(t, err, string(out))
+	}
+
+	user, repo, err := g.RepoInfo(context.Background())
+	require.NoError(t, err, setup[0].addr)
+	assert.Equal(t, "arsham", user)
+	assert.Equal(t, "shark", repo)
+
+	g.Remote = setup[0].remote
+	user, repo, err = g.RepoInfo(context.Background())
+	require.NoError(t, err, setup[0].addr)
+	assert.Equal(t, "arsham", user)
+	assert.Equal(t, "shark", repo)
+
+	g.Remote = setup[1].remote
+	user, repo, err = g.RepoInfo(context.Background())
+	require.NoError(t, err, setup[0].addr)
+	assert.Equal(t, "arsham", user)
+	assert.Equal(t, "arshlib.nvim", repo)
 }

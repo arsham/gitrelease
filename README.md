@@ -39,6 +39,12 @@ If you want to release an old tag:
 gitrelease -t v0.1.2
 ```
 
+If you want to use a different remote other than the `origin`:
+
+```bash
+gitrelease -r upstream
+```
+
 ## License
 
 Licensed under the MIT License. Check the [LICENSE](./LICENSE) file for details.

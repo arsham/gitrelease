@@ -13,6 +13,7 @@ import (
 var (
 	tag       string
 	printMode bool
+	remote    string
 	rootCmd   = &cobra.Command{
 		Use:   "gitrelease",
 		Short: "Release commit information of a tag to github",
@@ -21,7 +22,9 @@ var (
 			if token == "" {
 				return errors.New("please export GITHUB_TOKEN")
 			}
-			g := &commit.Git{}
+			g := &commit.Git{
+				Remote: remote,
+			}
 
 			user, repo, err := g.RepoInfo(cmd.Context())
 			if err != nil {
@@ -63,4 +66,5 @@ func init() {
 	cobra.OnInitialize(viper.AutomaticEnv)
 	rootCmd.PersistentFlags().StringVarP(&tag, "tag", "t", "@", "tag to produce the logs for. Leave empty for current tag.")
 	rootCmd.PersistentFlags().BoolVarP(&printMode, "print", "p", false, "only print, do not release!")
+	rootCmd.PersistentFlags().StringVarP(&remote, "remote", "r", "origin", "use a different remote")
 }

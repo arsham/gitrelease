@@ -21,7 +21,8 @@ const baseURL = "https://api.github.com"
 // Git executes git processes targeted at a directory. If the Dir property is
 // empty, all calls will be on the current folder.
 type Git struct {
-	Dir string
+	Dir    string
+	Remote string
 }
 
 // LatestTag returns the last tag in the repository.
@@ -84,11 +85,15 @@ var infoRe = regexp.MustCompile(`github\.com[:/](?P<user>[^/]+)/(?P<repo>.+?)(?:
 
 // RepoInfo returns some information about the repository.
 func (g Git) RepoInfo(ctx context.Context) (user, repo string, err error) {
+	if g.Remote == "" {
+		g.Remote = "origin"
+	}
 	args := []string{
 		"config",
 		"--get",
-		"remote.origin.url",
+		fmt.Sprintf("remote.%s.url", g.Remote),
 	}
+	// nolint:gosec // it is required.
 	cmd := exec.CommandContext(ctx, "git", args...)
 	cmd.Dir = g.Dir
 	out, err := cmd.CombinedOutput()
