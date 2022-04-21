@@ -121,7 +121,7 @@ type releaseCreate struct {
 }
 
 // Release publishes the release for the user on the repo.
-func (g Git) Release(token, user, repo, tag, desc string) error {
+func (g Git) Release(ctx context.Context, token, user, repo, tag, desc string) error {
 	params := releaseCreate{
 		TagName: tag,
 		Body:    desc,
@@ -139,6 +139,8 @@ func (g Git) Release(token, user, repo, tag, desc string) error {
 	if err != nil {
 		return errors.Wrapf(err, "creating request to the API: %q", string(payload))
 	}
+	req = req.WithContext(ctx)
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.Wrapf(err, "submitting to the API: %q", string(payload))

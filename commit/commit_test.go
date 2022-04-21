@@ -18,31 +18,40 @@ func TestGroupFromCommit(t *testing.T) {
 		line string
 		want commit.Group
 	}{
-		"not special": {line: "something",
+		"not special": {
+			line: "something",
 			want: commit.NewGroup("Misc", "", "something"),
 		},
-		"not special titled": {line: "Something",
+		"not special titled": {
+			line: "Something",
 			want: commit.NewGroup("Misc", "", "Something"),
 		},
-		"simply topic": {line: "fix something",
+		"simply topic": {
+			line: "fix something",
 			want: commit.NewGroup("Fix", "", "something"),
 		},
-		"simply topic multi": {line: "fix something" + additional,
+		"simply topic multi": {
+			line: "fix something" + additional,
 			want: commit.NewGroup("Fix", "", "something"+additional),
 		},
-		"simply topic titled": {line: "Fix Something",
+		"simply topic titled": {
+			line: "Fix Something",
 			want: commit.NewGroup("Fix", "", "Something"),
 		},
-		"topic section": {line: "Fix(repo) something",
+		"topic section": {
+			line: "Fix(repo) something",
 			want: commit.NewGroup("Fix", "repo", "something"),
 		},
-		"topic section multi": {line: "Fix(repo) something" + additional,
+		"topic section multi": {
+			line: "Fix(repo) something" + additional,
 			want: commit.NewGroup("Fix", "repo", "something"+additional),
 		},
-		"topic section colon": {line: "Fix(repo): something",
+		"topic section colon": {
+			line: "Fix(repo): something",
 			want: commit.NewGroup("Fix", "repo", "something"),
 		},
-		"topic section colon multi": {line: "Fix(repo): something" + additional,
+		"topic section colon multi": {
+			line: "Fix(repo): something" + additional,
 			want: commit.NewGroup("Fix", "repo", "something"+additional),
 		},
 		"ref":          {line: "ref something", want: commit.NewGroup("Refactor", "", "something")},

@@ -6,6 +6,12 @@ dir="./..."
 short="-short"
 flags=""
 timeout=1m
+build_tag=$(shell git describe --abbrev=0 --tags)
+current_sha=$(shell git rev-parse --short HEAD)
+
+.PHONY: install
+install: ## Install gitrelease.
+	@go install -trimpath -ldflags="-s -w -X main.version=$(build_tag) -X main.currentSha=$(current_sha)"
 
 .PHONY: unit_test
 unit_test: ## Run unit tests. You can set: [run, timeout, short, dir, flags]. Example: make unit_test flags="-race".
