@@ -16,3 +16,4 @@ vendor/
 tmp/
 bin/
 coverage.out
+go.work

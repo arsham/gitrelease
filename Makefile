@@ -23,16 +23,14 @@ lint: ## list the code
 	go vet ./...
 	golangci-lint run ./...
 
-
 .PHONY: ci_tests
 ci_tests: ## Run tests for CI.
 	go test -trimpath --timeout=10m -failfast -v -tags=integration -race -covermode=atomic -coverprofile=coverage.out ./...
 
-
 .PHONY: dependencies
 dependencies: ## Install dependencies requried for development operations.
 	@go install github.com/cespare/reflex@latest
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.45.0
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.45.2
 	@go install github.com/psampaz/go-mod-outdated@latest
 	@go install github.com/jondot/goweight@latest
 	@go get -t -u golang.org/x/tools/cmd/cover
@@ -40,17 +38,14 @@ dependencies: ## Install dependencies requried for development operations.
 	@go get -u ./...
 	@go mod tidy
 
-
 .PHONY: run
 run: ## Run the application. More like: make run args="update user"
 	@go run . $(args)
-
 
 .PHONY: clean
 clean: ## Clean test caches and tidy up modules.
 	@go clean -testcache
 	@go mod tidy
-
 
 .PHONY: coverage
 coverage: ## Show the test coverage on browser.
@@ -59,7 +54,7 @@ coverage: ## Show the test coverage on browser.
 	go tool cover -html=coverage.out
 
 .PHONY: audit
-audit:
+audit: ## Audit the code for updates, vulnerabilities and binary weight.
 	go list -u -m -json all | go-mod-outdated -update -direct
 	go list -json -m all | nancy sleuth
 	goweight | head -n 20
