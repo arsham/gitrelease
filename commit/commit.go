@@ -49,6 +49,8 @@ func GroupFromCommit(msg string) Group {
 		verb = "Enhancements"
 	case "upgrade":
 		verb = "Upgrades"
+	case "ci":
+		verb = "CI"
 	case "style":
 		verb = "Style"
 	default:
