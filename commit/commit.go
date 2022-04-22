@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	descRe = regexp.MustCompile(`^\s*([[:alpha:]]+)\(?([[:alpha:],-]+)?\)?:?(.*)`)
+	descRe = regexp.MustCompile(`^\s*([[:alpha:]]+!?)\(?([[:alpha:],-]+)?\)?:?(.*)`)
 	refRe  = regexp.MustCompile(`[[:alpha:]]+\s+#\d+`)
 )
 
@@ -20,6 +20,7 @@ type Group struct {
 	Verb        string
 	Subject     string
 	Description string
+	Breaking    bool
 }
 
 // GroupFromCommit creates a Group object from the given line.
@@ -28,6 +29,12 @@ func GroupFromCommit(msg string) Group {
 	verb := matches[1]
 	subject := matches[2]
 	desc := matches[3]
+
+	breaking := false
+	if strings.HasSuffix(verb, "!") {
+		breaking = true
+		verb = strings.TrimSuffix(verb, "!")
+	}
 
 	switch strings.ToLower(verb) {
 	case "ref", "refactor":
@@ -60,6 +67,7 @@ func GroupFromCommit(msg string) Group {
 		Verb:        verb,
 		Subject:     subject,
 		Description: strings.TrimSpace(desc),
+		Breaking:    breaking,
 	}
 }
 
@@ -115,27 +123,44 @@ func ParseGroups(logs []string) string {
 	}
 
 	buf := &strings.Builder{}
+	i := 0
 	for _, desc := range groups {
-		fmt.Fprintln(buf, desc[0].Section())
-		fmt.Fprintln(buf, "")
+		fmt.Fprintln(buf, desc[0].Section()+"\n")
 		for _, line := range desc {
-			fmt.Fprintln(buf, line.DescriptionString())
+			fmt.Fprint(buf, line.DescriptionString())
+			if line.Breaking {
+				fmt.Fprintf(buf, " [**BREAKING CHANGE**]")
+			}
+			fmt.Fprintln(buf, "")
 		}
-		fmt.Fprintf(buf, "\n\n")
+		i++
+		if i < len(groups) {
+			fmt.Fprintf(buf, "\n\n")
+		}
 	}
-	return buf.String()
+
+	str := buf.String()
+	return strings.TrimSuffix(str, "\n")
 }
 
+// cleanup returns only the title of the logs.
 func cleanup(logs []string) []string {
 	ret := make([]string, 0, len(logs))
 	for _, commit := range logs {
 		items := strings.Split(commit, "\n")
 		item := items[0]
+		breaking := false
 		for _, line := range items[1:] {
+			if strings.Contains(line, "BREAKING CHANGE") {
+				breaking = true
+			}
 			if !strings.Contains(line, "#") {
 				continue
 			}
 			item = fmt.Sprintf("%s (%s)", item, line)
+		}
+		if breaking {
+			item += " [**BREAKING CHANGE**]"
 		}
 		if item == "" {
 			continue
