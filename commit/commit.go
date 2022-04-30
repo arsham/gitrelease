@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	descRe = regexp.MustCompile(`^\s*([[:alpha:]]+!?)\(?([[:alpha:],-]+)?\)?:?(.*)`)
+	descRe = regexp.MustCompile(`^\s*([[:alpha:]]+!?)\(?([[:alpha:],_-]+)?\)?:?(.*)`)
 	refRe  = regexp.MustCompile(`[[:alpha:]]+\s+#\d+`)
 )
 

@@ -69,6 +69,7 @@ func TestGroupFromCommit(t *testing.T) {
 		"ci":           {line: "ci: change something", want: commit.NewGroup("CI", "", "change something", false)},
 		"comma sep":    {line: "fix(git,commit): something", want: commit.NewGroup("Fix", "git,commit", "something", false)},
 		"hyphen subj":  {line: "fix(git-commit): something", want: commit.NewGroup("Fix", "git-commit", "something", false)},
+		"underscore":   {line: "fix(git_commit): something", want: commit.NewGroup("Fix", "git_commit", "something", false)},
 	}
 
 	for name, tc := range tcs {
