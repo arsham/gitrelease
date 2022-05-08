@@ -70,6 +70,7 @@ func TestGroupFromCommit(t *testing.T) {
 		"comma sep":    {line: "fix(git,commit): something", want: commit.NewGroup("Fix", "git,commit", "something", false)},
 		"hyphen subj":  {line: "fix(git-commit): something", want: commit.NewGroup("Fix", "git-commit", "something", false)},
 		"underscore":   {line: "fix(git_commit): something", want: commit.NewGroup("Fix", "git_commit", "something", false)},
+		"docs":         {line: "docs: change something", want: commit.NewGroup("Docs", "", "change something", false)},
 	}
 
 	for name, tc := range tcs {
@@ -140,6 +141,10 @@ func testGroupDescriptionString(t *testing.T) {
 		"hyphenated subjects": {
 			group: commit.NewGroup("Fix", "git-commit", msg, false),
 			want:  fmt.Sprintf("%s**Git-commit:** %s", prefix, wantMsg),
+		},
+		"docs": {
+			group: commit.NewGroup("Docs", "README", msg, false),
+			want:  fmt.Sprintf("%s**README:** %s", prefix, wantMsg),
 		},
 	}
 

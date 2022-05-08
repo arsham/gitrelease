@@ -53,6 +53,8 @@ func GroupFromCommit(msg string) Group {
 		verb = "CI"
 	case "style":
 		verb = "Style"
+	case "docs":
+		verb = "Docs"
 	default:
 		verb = ""
 	}
