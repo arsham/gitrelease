@@ -199,10 +199,52 @@ func testGroupParseGroupsMultipleGroups(t *testing.T) {
 }
 
 func testGroupParseGroupsBreakingSign(t *testing.T) {
+	t.Run("NoScope", testGroupParseGroupsBreakingSignNoScope)
+	t.Run("BeforeScope", testGroupParseGroupsBreakingSignBeforeScope)
+	t.Run("AfterScope", testGroupParseGroupsBreakingSignAfterScope)
+}
+
+func testGroupParseGroupsBreakingSignNoScope(t *testing.T) {
+	t.Parallel()
+	logs := []string{
+		"ref: nothing important",
+		"ref!: this is a test",
+	}
+	got := commit.ParseGroups(logs)
+
+	want := strings.Join([]string{
+		"### Refactor\n",
+		"- Nothing important",
+		"- This is a test [**BREAKING CHANGE**]",
+	}, "\n")
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("(-want +got):\n%s", diff)
+	}
+}
+
+func testGroupParseGroupsBreakingSignBeforeScope(t *testing.T) {
 	t.Parallel()
 	logs := []string{
 		"ref: nothing important",
 		"ref!(repo): this is a test",
+	}
+	got := commit.ParseGroups(logs)
+
+	want := strings.Join([]string{
+		"### Refactor\n",
+		"- Nothing important",
+		"- **Repo:** This is a test [**BREAKING CHANGE**]",
+	}, "\n")
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("(-want +got):\n%s", diff)
+	}
+}
+
+func testGroupParseGroupsBreakingSignAfterScope(t *testing.T) {
+	t.Parallel()
+	logs := []string{
+		"ref: nothing important",
+		"ref(repo)!: this is a test",
 	}
 	got := commit.ParseGroups(logs)
 

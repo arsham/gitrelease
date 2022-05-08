@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	descRe = regexp.MustCompile(`^\s*([[:alpha:]]+!?)\(?([[:alpha:],_-]+)?\)?:?(.*)`)
+	descRe = regexp.MustCompile(`^\s*([[:alpha:]]+!?)\(?([[:alpha:],_-]+)?\)?(!)?:?(.*)`)
 	refRe  = regexp.MustCompile(`[[:alpha:]]+\s+#\d+`)
 )
 
@@ -28,10 +28,11 @@ func GroupFromCommit(msg string) Group {
 	matches := descRe.FindStringSubmatch(msg)
 	verb := matches[1]
 	subject := matches[2]
-	desc := matches[3]
+	verbBreak := matches[3]
+	desc := matches[4]
 
 	breaking := false
-	if strings.HasSuffix(verb, "!") {
+	if strings.HasSuffix(verb, "!") || verbBreak != "" {
 		breaking = true
 		verb = strings.TrimSuffix(verb, "!")
 	}
