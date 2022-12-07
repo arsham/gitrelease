@@ -16,6 +16,8 @@ page.
 
 This program requires `Go >= v1.17`.
 
+Uses your github token with permission scope: **repo**
+
 ## Installation
 
 To install:
@@ -23,6 +25,9 @@ To install:
 ```bash
 go install github.com/arsham/gitrelease@latest
 ```
+
+Export your github token:
+`export GITHUB_TOKEN="ghp_yourgithubtoken"`
 
 ## Usage
 
